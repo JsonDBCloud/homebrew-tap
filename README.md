@@ -2,6 +2,7 @@
 
 Homebrew tap for the [jsondb](https://github.com/JsonDBCloud/cli) CLI — the command-line interface for [jsondb.cloud](https://jsondb.cloud), a hosted JSON document database.
 
+[![CI](https://github.com/JsonDBCloud/homebrew-tap/actions/workflows/ci.yml/badge.svg)](https://github.com/JsonDBCloud/homebrew-tap/actions)
 [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](https://opensource.org/licenses/MIT)
 
 ## Install
