@@ -18,11 +18,16 @@ jobs:
       - name: Set up Homebrew
         uses: Homebrew/actions/setup-homebrew@master
 
+      - name: Tap local formula
+        env:
+          WORKSPACE: ${{ github.workspace }}
+        run: brew tap JsonDBCloud/tap "$WORKSPACE"
+
       - name: Audit formula
-        run: brew audit --strict --formula Formula/jsondb.rb
+        run: brew audit --strict --formula jsondb
 
       - name: Install formula
-        run: brew install Formula/jsondb.rb
+        run: brew install jsondb
 
       - name: Test formula
         run: brew test jsondb
