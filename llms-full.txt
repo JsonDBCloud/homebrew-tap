@@ -1,0 +1,373 @@
+# @jsondb-cloud/cli
+
+> Homebrew tap for jsondb CLI — the command-line interface for jsondb.cloud, a hosted JSON document database.
+
+## Install
+
+```bash
+brew tap JsonDBCloud/tap
+brew install jsondb
+```
+
+## Quick Start
+
+```bash
+# Authenticate
+jsondb login --api-key jdb_sk_your_key_here
+
+# List collections
+jsondb collections
+
+# Push data
+jsondb push ./data.json --to users
+```
+
+## Global Options
+
+| Option | Description |
+|---|---|
+| `--api-key <key>` | Use a specific API key (overrides stored credentials) |
+| `--project <ns>` | Target project namespace (default: `default`) |
+| `--base-url <url>` | API base URL (default: `https://api.jsondb.cloud`) |
+| `--format <fmt>` | Output format: `json`, `raw`, `ndjson`, `table` |
+
+## Configuration
+
+**Config file:** `~/.config/jsondb/credentials.json`
+
+```json
+{
+  "apiKey": "jdb_sk_...",
+  "project": "default",
+  "baseUrl": "https://api.jsondb.cloud"
+}
+```
+
+**Environment variables** (override config file):
+
+- `JSONDB_API_KEY` — API key
+- `JSONDB_PROJECT` — project namespace
+- `JSONDB_BASE_URL` — API base URL
+
+## Commands
+
+### Authentication
+
+#### `jsondb login`
+
+Authenticate and store credentials.
+
+Options:
+- `--api-key <key>` — API key (must start with `jdb_sk_`)
+- `--project <ns>` — project namespace
+- `--base-url <url>` — API base URL
+
+Stores credentials at `~/.config/jsondb/credentials.json`.
+
+#### `jsondb logout`
+
+Remove stored credentials.
+
+#### `jsondb whoami`
+
+Show current configuration: key hint, project, and base URL.
+
+---
+
+### Documents
+
+#### `jsondb get <path>`
+
+Get a document or field value.
+
+- Path format: `collection/docId` or `collection/docId/field`
+- Options: `--format <fmt>`
+
+#### `jsondb create <collection>`
+
+Create a new document in a collection.
+
+- Options:
+  - `--file <file>` — read JSON from file (reads from stdin if omitted)
+  - `--id <id>` — specify document ID (auto-generated if omitted)
+
+#### `jsondb update <path>`
+
+Full document replacement.
+
+- Path format: `collection/docId`
+- Options: `--file <file>` (reads from stdin if omitted)
+
+#### `jsondb patch <path>`
+
+Partial update via JSON merge patch.
+
+- Path format: `collection/docId`
+- Options: `--file <file>` (reads from stdin if omitted)
+
+#### `jsondb delete <path>`
+
+Delete a document permanently.
+
+- Path format: `collection/docId`
+
+**Examples:**
+
+```bash
+# Create a document
+echo '{"name": "Alice", "role": "admin"}' | jsondb create users
+
+# Get it back
+jsondb get users/abc123
+
+# Update a field
+echo '{"role": "superadmin"}' | jsondb patch users/abc123
+
+# Delete it
+jsondb delete users/abc123
+```
+
+---
+
+### Collections
+
+#### `jsondb collections`
+
+List all collections, sorted alphabetically, one per line.
+
+#### `jsondb documents <collection>`
+
+List documents in a collection.
+
+- Options:
+  - `--limit <n>` — max documents to return (default: 20)
+  - `--format <fmt>`
+
+#### `jsondb count <collection>`
+
+Count documents in a collection.
+
+- Options:
+  - `--filter <expr>` — filter expression, format: `field=value`. Can be specified multiple times (AND logic).
+
+---
+
+### Import/Export
+
+#### `jsondb push <file>`
+
+Import documents from a JSON, CSV, or NDJSON file.
+
+- Options:
+  - `--to <collection>` — target collection (REQUIRED)
+  - `--on-conflict <strategy>` — conflict strategy: `fail`, `skip`, `overwrite` (default: `fail`)
+- Returns a summary with created/skipped/failed counts.
+
+#### `jsondb pull <collection>`
+
+Export documents from a collection.
+
+- Options:
+  - `--out <file>` — output file path (prints to stdout if omitted)
+  - `--format <fmt>` — `json`, `csv`, `ndjson` (default: `json`)
+  - `--filter <expr>` — filter expression, format: `field=value`
+
+**Examples:**
+
+```bash
+# Import from CSV
+jsondb push ./users.csv --to users --on-conflict skip
+
+# Export as NDJSON
+jsondb pull users --format ndjson --out users.ndjson
+```
+
+---
+
+### Schema
+
+#### `jsondb schema get <collection>`
+
+Get the JSON schema for a collection.
+
+#### `jsondb schema set <collection>`
+
+Set a JSON schema for a collection.
+
+- Options: `--file <file>` (reads from stdin if omitted)
+
+#### `jsondb schema remove <collection>`
+
+Remove schema validation from a collection.
+
+#### `jsondb validate <collection>`
+
+Dry-run schema validation against a document.
+
+- Options: `--file <file>` (reads from stdin if omitted)
+- Exits with code 1 on validation failure (HTTP 422).
+
+**Examples:**
+
+```bash
+# Set a schema
+echo '{"type": "object", "required": ["name", "email"]}' | jsondb schema set users
+
+# Validate before creating
+echo '{"name": "Alice"}' | jsondb validate users
+```
+
+---
+
+### Versions
+
+#### `jsondb versions list <collection> <id>`
+
+List all versions of a document. Output: table with Version, Action, Timestamp, Size.
+
+#### `jsondb versions get <collection> <id> <version>`
+
+Get a document at a specific version number.
+
+#### `jsondb versions diff <collection> <id>`
+
+Diff between two versions.
+
+- Options:
+  - `--from <version>` — source version (REQUIRED)
+  - `--to <version>` — target version (REQUIRED)
+- Output: JSON diff
+
+#### `jsondb versions restore <collection> <id> <version>`
+
+Restore a document to a previous version. Creates a new version entry.
+
+**Examples:**
+
+```bash
+# List versions
+jsondb versions list users abc123
+
+# Compare versions
+jsondb versions diff users abc123 --from 1 --to 3
+
+# Restore
+jsondb versions restore users abc123 1
+```
+
+---
+
+### Webhooks
+
+#### `jsondb webhooks list <collection>`
+
+List webhooks for a collection. Output: table with ID, URL, Events, Status.
+
+#### `jsondb webhooks create <collection>`
+
+Create a webhook.
+
+- Options:
+  - `--url <url>` — webhook endpoint (REQUIRED)
+  - `--events <events>` — comma-separated event types (REQUIRED): `document.created`, `document.updated`, `document.deleted`
+  - `--description <desc>` — human-readable description
+  - `--secret <secret>` — HMAC signing secret
+
+#### `jsondb webhooks get <collection> <id>`
+
+Get webhook details including delivery history.
+
+#### `jsondb webhooks update <collection> <id>`
+
+Update a webhook. At least one option is required.
+
+- Options:
+  - `--url <url>`
+  - `--events <events>`
+  - `--description <desc>`
+  - `--status <status>` — `active` or `disabled`
+
+#### `jsondb webhooks delete <collection> <id>`
+
+Delete a webhook.
+
+#### `jsondb webhooks test <collection> <id>`
+
+Send a test event to the webhook endpoint.
+
+**Examples:**
+
+```bash
+# Create a webhook
+jsondb webhooks create users --url https://example.com/hook --events document.created,document.updated
+
+# Test it
+jsondb webhooks test users wh_abc123
+```
+
+---
+
+### API Keys
+
+#### `jsondb keys list`
+
+List all API keys. Output: table with NAME, HINT, SCOPE, PROJECT, STATUS, CREATED.
+
+#### `jsondb keys create`
+
+Create a new API key.
+
+- Options:
+  - `--name <name>` — key name
+  - `--scope <scope>` — `read-only` or `read-write` (default: `read-write`)
+  - `--project <ns>` — project namespace
+- Note: currently requires the web dashboard.
+
+#### `jsondb keys revoke <id>`
+
+Revoke an API key.
+
+- Note: currently requires the web dashboard.
+
+---
+
+### Utility
+
+#### `jsondb bulk <collection>`
+
+Execute bulk operations on a collection.
+
+- Options: `--file <file>` (reads from stdin if omitted)
+- Input: JSON array of operation objects.
+
+---
+
+## Output Formats
+
+| Format | Description |
+|---|---|
+| `json` | Pretty-printed JSON |
+| `raw` | Compact JSON (no whitespace) |
+| `ndjson` | Newline-delimited JSON, one object per line |
+| `table` | Human-readable table |
+
+## Errors
+
+All errors exit with code 1.
+
+| HTTP Status | Meaning |
+|---|---|
+| 401 | Invalid API key. Prompts to run `jsondb login`. |
+| 403 | Insufficient scope for the requested operation. |
+| 404 | Document or resource not found. |
+| 400 / 422 | Validation error. Details returned as JSON. |
+| 409 | Write conflict. |
+| 413 | Document too large. |
+| 429 | Rate limited or quota exceeded. |
+| 500 | Internal server error. |
+
+## Links
+
+- Docs: https://jsondb.cloud/docs/cli
+- Source: https://github.com/JsonDBCloud/cli
+- Homebrew tap: https://github.com/JsonDBCloud/homebrew-tap
