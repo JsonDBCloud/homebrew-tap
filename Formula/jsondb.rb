@@ -1,26 +1,26 @@
 class Jsondb < Formula
   desc "CLI tool for jsondb.cloud — manage your JSON database from the terminal"
   homepage "https://github.com/JsonDBCloud/cli"
-  version "1.0.23"
+  version "1.0.24"
   license "MIT"
 
   on_macos do
     if Hardware::CPU.arm?
-      url "https://github.com/JsonDBCloud/cli/releases/download/v1.0.23/jsondb-darwin-arm64.tar.gz"
-      sha256 "7e9bf92d07ce4984a3cab334dd29ac77c66bec97c1a234a2db81b24c202a7b0a"
+      url "https://github.com/JsonDBCloud/cli/releases/download/v1.0.24/jsondb-darwin-arm64.tar.gz"
+      sha256 "8122b2b16decf7bbfc5e44bf01f96e66763bc02495f78098c954f372b6fe8b73"
     else
-      url "https://github.com/JsonDBCloud/cli/releases/download/v1.0.23/jsondb-darwin-x64.tar.gz"
-      sha256 "c763546881e7cf80da0ba08562111e24be78a2c8abf79da47d31b9c998c153df"
+      url "https://github.com/JsonDBCloud/cli/releases/download/v1.0.24/jsondb-darwin-x64.tar.gz"
+      sha256 "8d4998ccf7494b9e586825d7a21d6d0d7237c3e57b7c5ed09317837fcbf2db01"
     end
   end
 
   on_linux do
     if Hardware::CPU.arm?
-      url "https://github.com/JsonDBCloud/cli/releases/download/v1.0.23/jsondb-linux-arm64.tar.gz"
-      sha256 "d025064a18ff6b7f7252629a4ac4361fff168cce3874086159215759c5b5eb03"
+      url "https://github.com/JsonDBCloud/cli/releases/download/v1.0.24/jsondb-linux-arm64.tar.gz"
+      sha256 "e37d589b5107bbbcb98201634e23a3af8fbd9f8bc29c645c5da7b1bdfa462502"
     else
-      url "https://github.com/JsonDBCloud/cli/releases/download/v1.0.23/jsondb-linux-x64.tar.gz"
-      sha256 "08ef039ed5080fc2ba36f5017cf272ded77b5f6258990e3769cfa5656496d06d"
+      url "https://github.com/JsonDBCloud/cli/releases/download/v1.0.24/jsondb-linux-x64.tar.gz"
+      sha256 "d93e11a463610e06d98dda9be26b5ff2bec890cca60fe14fdbfb3cfd35185b7a"
     end
   end
 
