@@ -29,6 +29,6 @@ class Jsondb < Formula
   end
 
   test do
-    assert_match "jsondb", shell_output("#{bin}/jsondb --version")
+    assert_match(/\d+\.\d+\.\d+/, shell_output("#{bin}/jsondb --version"))
   end
 end
